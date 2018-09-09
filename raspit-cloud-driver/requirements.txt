@@ -1,0 +1,2 @@
+google-api-python-client
+Jinja2==2.10

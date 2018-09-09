@@ -1,0 +1,12 @@
+--- GM-master.pl.old	2017-09-13 20:14:40.289956591 +0200
++++ GM-master.pl	2017-09-10 18:41:05.964434060 +0200
+@@ -1812,6 +1812,9 @@
+                 }
+               }
+               $starthh4dom[1] = $DOMAIN1_STARTHH{$regionname}[$IWINDOW];
++              if (length($starthh4dom[1])==1) {
++                $starthh4dom[1]="0".$starthh4dom[1];
++              }
+ 
+               ### ALLOW DIFFERENT STARTS FOR DIFFERENT DOMAINS
+               for ( $idomain=2 ; $idomain<=$MAXDOMAIN{$regionname}[$IWINDOW] ; $idomain++ ) {
