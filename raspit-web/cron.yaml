@@ -1,4 +1,4 @@
 cron:
 - description: Periodic forecast computing launch
   url: /compute-launch
-  schedule: every day 08:00
+  schedule: every day 05:00
