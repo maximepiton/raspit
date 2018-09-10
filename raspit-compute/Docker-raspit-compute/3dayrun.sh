@@ -24,11 +24,11 @@ function upload {
   if [[ -n "$GCS_BUCKET" ]]
   then
     echo "uploading "$1" to "$GCS_BUCKET" GCS bucket"
-    gsutil rm -r gs://"$GCS_BUCKET"/$2_inprogress
-    gsutil -m cp /root/rasp/$1/wrfout*d02*00:00 gs://"$GCS_BUCKET"/$2_inprogress/
-    gsutil rm -r gs://"$GCS_BUCKET"/$2
-    gsutil -m mv gs://"$GCS_BUCKET"/$2_inprogress/* gs://"$GCS_BUCKET"/$2
-    gcloud pubsub topics publish $PUBSUB_TOPIC --message="Run finished" --attribute path="$GCS_BUCKET"/$2
+    gsutil rm -r gs://$GCS_BUCKET/$2_inprogress
+    gsutil -m cp /root/rasp/$1/wrfout*d02*00:00 gs://$GCS_BUCKET/$2_inprogress/
+    gsutil rm -r gs://$GCS_BUCKET/$2
+    gsutil -m mv gs://$GCS_BUCKET/$2_inprogress/* gs://$GCS_BUCKET/$2
+    gcloud pubsub topics publish $PUBSUB_TOPIC --message="Run finished" --attribute path=$GCS_BUCKET/$2
   else
     echo "WARNING : GCS_BUCKET environment variable not set. No upload will be done."
   fi
