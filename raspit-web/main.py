@@ -33,8 +33,7 @@ def three_day_run():
                'image': 'raspit-compute',
                'zone': 'us-east1-b',
                'instance_type': 'n1-highcpu-8',
-               'env': {'GCS_BUCKET':
-                        'gcr.io/' + project_id + '/raspit-compute',
+               'env': {'GCS_BUCKET': 'raspit-compute',
                        'PUBSUB_TOPIC':
                         'gcr.io/' + project_id + '/raspit-compute'}}
 
