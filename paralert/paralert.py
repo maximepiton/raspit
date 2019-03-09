@@ -2,6 +2,7 @@ import pandas as pd
 import json
 import math
 import yaml
+import smtplib
 
 
 def add_windspeed_winddir_to_forecast(forecast_df):
@@ -78,6 +79,20 @@ def get_flight_score(forecast_df):
         DataFrame: Filtered-out DataFrame
     """
     return forecast_df.sum(axis = 0)["pblh"]
+    
+def send_mail(result, site):
+    
+    content = site + result
+    
+    mail = smtplib.SMTP('smtp.gmail.com',587) 
+    mail.ehlo() 
+    mail.starttls()
+    
+    mail.login('AlertParapente@gmail.com','alertparapente')
+    
+    mail.sendmail('AlertParapente@gmail.com','AlertParapente@gmail.com', content)
+    
+    mail.close()
 
 
 if __name__ == "__main__":
@@ -105,3 +120,5 @@ if __name__ == "__main__":
     print(forecast_df)
 
     print(get_flight_score(forecast_df))
+    
+    send_mail(str(get_flight_score(forecast_df)), 'gensac')
