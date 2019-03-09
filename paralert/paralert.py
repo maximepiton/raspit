@@ -2,6 +2,24 @@ import pandas as pd
 import json
 import math
 import yaml
+import urllib.request
+
+
+def get_paraglidable_json():
+    
+    response = requests.get("https://api.paraglidable.com/?key=d60092fb1105a1f4&format=JSON&version=1")
+    forecast_pgble = json.loads(response.text)
+    forecast_pgble = json.dumps(forecast_pgble, sort_keys=True, indent=4)
+#    print(forecast_pgble)
+          
+    write_to_JSON_file('./paraglidable_forecast/', 'forecast_pgble', forecast_pgble)
+
+
+def write_to_JSON_file(path, fileName, data):
+    
+    filePathNameWExt = './' + path + '/' + fileName + '.json'
+    with open(filePathNameWExt, 'w') as fp:
+        json.dump(data, fp)
 
 
 def add_windspeed_winddir_to_forecast(forecast_df):
@@ -81,6 +99,9 @@ def get_flight_score(forecast_df):
 
 
 if __name__ == "__main__":
+    
+    get_paraglidable_json()
+    
     with open("forecast.json", "r") as f:
         json_data = json.load(f)
 
