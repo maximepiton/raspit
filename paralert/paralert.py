@@ -2,7 +2,7 @@ import pandas as pd
 import json
 import math
 import yaml
-import urllib.request
+import requests
 import numpy
 
 
