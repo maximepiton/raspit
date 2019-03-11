@@ -93,8 +93,9 @@ if __name__ == "__main__":
     """
     Get Paraglidable score
     """
+    print ( 'Paraglidable score : ' + '\n' )
     for x in range(0, 3):
-        paraglidable.get_score_paraglidable(x)
+        print (paraglidable.get_score_paraglidable(x))
 
 
     """
