@@ -9,14 +9,7 @@ def get_paraglidable_json():
     response = requests.get("https://api.paraglidable.com/?key=d60092fb1105a1f4&format=JSON&version=1")
     forecast_pgble = json.loads(response.text)
           
-    write_to_JSON_file('./paraglidable_forecast/', 'forecast_pgble', forecast_pgble)
-
-
-def write_to_JSON_file(path, fileName, data):
-    
-    filePathNameWExt = './' + path + '/' + fileName + '.json'
-    with open(filePathNameWExt, 'w') as fp:
-        json.dump(data, fp)
+    utilities.write_to_JSON_file('./paraglidable_forecast/', 'forecast_pgble', forecast_pgble)
 
         
 def get_score_paraglidable(site):
