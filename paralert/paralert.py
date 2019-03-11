@@ -2,23 +2,8 @@ import pandas as pd
 import json
 import math
 import yaml
-import requests
-import numpy
 
-
-def get_paraglidable_json():
-    
-    response = requests.get("https://api.paraglidable.com/?key=d60092fb1105a1f4&format=JSON&version=1")
-    forecast_pgble = json.loads(response.text)
-          
-    write_to_JSON_file('./paraglidable_forecast/', 'forecast_pgble', forecast_pgble)
-
-
-def write_to_JSON_file(path, fileName, data):
-    
-    filePathNameWExt = './' + path + '/' + fileName + '.json'
-    with open(filePathNameWExt, 'w') as fp:
-        json.dump(data, fp)
+import paraglidable
 
 
 def add_windspeed_winddir_to_forecast(forecast_df):
@@ -97,49 +82,19 @@ def get_flight_score(forecast_df):
     return forecast_df.sum(axis = 0)["pblh"]
 
 
-def date_N_day_after(N):
-    
-    from datetime import datetime, timedelta
-    
-    tomorrow = datetime.now() + timedelta(days=N)
-
-    return tomorrow.strftime("%Y-%m-%d")
-
-
-def get_score_paraglidable(site):
-    
-    with open("./paraglidable_forecast/forecast_pgble.json", "r") as f:
-        pgble_data = json.load(f)
-
-    tm_fly = pgble_data[date_N_day_after(1)][site]['forecast']['fly']
-    tm_XC = pgble_data[date_N_day_after(1)][site]['forecast']['XC']
-    atm_fly = pgble_data[date_N_day_after(2)][site]['forecast']['fly']
-    atm_XC = pgble_data[date_N_day_after(2)][site]['forecast']['XC']
-        
-    tomorrow_score = numpy.mean([tm_fly,tm_XC])
-    after_tomorrow_score = numpy.mean([atm_fly,atm_XC])
-    
-    tm_score_10 = int(tomorrow_score * 10)
-    atm_score_10 = int(after_tomorrow_score * 10)
-    
-    print(pgble_data[date_N_day_after(1)][site]['name'])    
-    print('demain : ' + str(tm_score_10) + '/10')
-    print('apres demain : ' + str(atm_score_10) + '/10')
-
-
 if __name__ == "__main__":
     
     """
     Get input forecast
     """
-    get_paraglidable_json()
+    paraglidable.get_paraglidable_json()
 
 
     """
     Get Paraglidable score
     """
     for x in range(0, 3):
-        get_score_paraglidable(x)
+        paraglidable.get_score_paraglidable(x)
 
 
     """
