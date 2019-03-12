@@ -93,9 +93,16 @@ if __name__ == "__main__":
     """
     Get Paraglidable score
     """
+    pgble = paraglidable.get_paraglidable_all_scores()
+    
     print ( 'Paraglidable score : ' + '\n' )
-    for x in range(0, 3):
-        print (paraglidable.get_score_paraglidable(x))
+    
+    for x in range (0, len(pgble)):
+        print(
+              "Site : "              + pgble[x][0] +              '\n' + 
+              "demain : " + '      ' + str(pgble[x][1]) + '/10' + '\n' +
+              "apres demain : "      + str(pgble[x][2]) + '/10' + '\n'
+              )
 
 
     """

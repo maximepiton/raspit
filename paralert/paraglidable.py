@@ -12,34 +12,37 @@ def get_paraglidable_json():
     utilities.write_to_JSON_file('./paraglidable_forecast/', 'forecast_pgble', forecast_pgble)
 
         
-def get_score_paraglidable(site):
+def get_paraglidable_score(site):
     
     with open("./paraglidable_forecast/forecast_pgble.json", "r") as f:
         pgble_data = json.load(f)
 
-    """ get notes in json file """
+    """ get scores in json file """
     tm_fly = pgble_data[utilities.date_N_day_after(1)][site]['forecast']['fly']
     tm_XC = pgble_data[utilities.date_N_day_after(1)][site]['forecast']['XC']
     atm_fly = pgble_data[utilities.date_N_day_after(2)][site]['forecast']['fly']
     atm_XC = pgble_data[utilities.date_N_day_after(2)][site]['forecast']['XC']
        
-    """ Finale score : mean of the 2 notes """
+    """ Score : mean of the 'XC' and 'fly' score """
     tomorrow_score = numpy.mean([tm_fly,tm_XC])
     after_tomorrow_score = numpy.mean([atm_fly,atm_XC])
     
-    """ Manage score to print xx/10 """
+    """ Manage score to print note xx/10 """
     tm_score_10 = int(tomorrow_score * 10)
     atm_score_10 = int(after_tomorrow_score * 10)
     
-    """ Formating result to nice view """
-    site = pgble_data[utilities.date_N_day_after(1)][site]['name']    
-    tm_score = str(tm_score_10) + '/10'
-    atm_score = str(atm_score_10) + '/10'
+    site_name = pgble_data[utilities.date_N_day_after(1)][site]['name']
     
-    result = (
-              "Site : "              + site +      '\n' + 
-              "demain : " + '      ' + tm_score +  '\n' +
-              "apres demain : "      + atm_score + '\n'
-              )
+    result_table = [site_name, tm_score_10, atm_score_10]
+    return result_table
+
+
+def get_paraglidable_all_scores():
     
-    return result
+        table = []
+    
+        """ range depend of the number of sites in paraglidable json file """
+        for x in range(0, 3):
+            table.append(get_paraglidable_score(x))
+
+        return table
