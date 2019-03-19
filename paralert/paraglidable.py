@@ -4,12 +4,17 @@ import numpy
 
 import utilities
 
+number_of_sites = 0
+
 def get_paraglidable_json():
     
-    response = requests.get("https://api.paraglidable.com/?key=d60092fb1105a1f4&format=JSON&version=1")
+    response = requests.get("https://api.paraglidable.com/?key=4933a9d306367800&format=JSON&version=1")
     forecast_pgble = json.loads(response.text)
           
     utilities.write_to_JSON_file('./paraglidable_forecast/', 'forecast_pgble', forecast_pgble)
+    
+    global number_of_sites
+    number_of_sites =len(forecast_pgble[utilities.date_N_day_after(1)])
 
         
 def get_paraglidable_score(site):
@@ -42,7 +47,8 @@ def get_paraglidable_all_scores():
         table = []
     
         """ range depend of the number of sites in paraglidable json file """
-        for x in range(0, 3):
+        for x in range(0, number_of_sites):
             table.append(get_paraglidable_score(x))
 
         return table
+
