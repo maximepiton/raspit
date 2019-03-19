@@ -87,13 +87,13 @@ if __name__ == "__main__":
     """
     Get input forecast
     """
-    paraglidable.get_paraglidable_json()
+    pgble_json = paraglidable.get_paraglidable_json()
 
 
     """
     Get Paraglidable score
     """
-    pgble = paraglidable.get_paraglidable_all_scores()
+    pgble = paraglidable.get_paraglidable_all_scores(pgble_json)
     
     print ( 'Paraglidable score : ' + '\n' )
     
