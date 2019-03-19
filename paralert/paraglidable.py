@@ -2,7 +2,7 @@ import json
 import requests
 import numpy
 
-import utilities
+import paralert_tool
 
 number_of_sites = 0
 
@@ -12,7 +12,7 @@ def get_paraglidable_json():
     forecast_pgble = json.loads(response.text)
 
     global number_of_sites
-    number_of_sites =len(forecast_pgble[utilities.date_N_day_after(1)])
+    number_of_sites =len(forecast_pgble[paralert_tool.date_N_day_after(1)])
     
     return forecast_pgble
 
@@ -20,10 +20,10 @@ def get_paraglidable_json():
 def get_paraglidable_score(json, site):
 
     """ get scores in json file """
-    tm_fly = json[utilities.date_N_day_after(1)][site]['forecast']['fly']
-    tm_XC = json[utilities.date_N_day_after(1)][site]['forecast']['XC']
-    atm_fly = json[utilities.date_N_day_after(2)][site]['forecast']['fly']
-    atm_XC = json[utilities.date_N_day_after(2)][site]['forecast']['XC']
+    tm_fly = json[paralert_tool.date_N_day_after(1)][site]['forecast']['fly']
+    tm_XC = json[paralert_tool.date_N_day_after(1)][site]['forecast']['XC']
+    atm_fly = json[paralert_tool.date_N_day_after(2)][site]['forecast']['fly']
+    atm_XC = json[paralert_tool.date_N_day_after(2)][site]['forecast']['XC']
        
     """ Score : mean of the 'XC' and 'fly' score """
     tomorrow_score = numpy.mean([tm_fly,tm_XC])
@@ -33,7 +33,7 @@ def get_paraglidable_score(json, site):
     tm_score_10 = int(tomorrow_score * 10)
     atm_score_10 = int(after_tomorrow_score * 10)
     
-    site_name = json[utilities.date_N_day_after(1)][site]['name']
+    site_name = json[paralert_tool.date_N_day_after(1)][site]['name']
     
     result_table = [site_name, tm_score_10, atm_score_10]
     return result_table
