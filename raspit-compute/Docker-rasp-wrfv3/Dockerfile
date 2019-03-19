@@ -30,9 +30,13 @@ ADD rangs.tgz $BASEDIR
 
 # Patch files with fixes
 COPY GM-master.pl.patch /root/
+COPY gribftpget.pl.patch /root/
 RUN cd $BASEDIR/bin \
   && patch GM-master.pl < ~/GM-master.pl.patch \
-  && rm ~/GM-master.pl.patch
+  && rm ~/GM-master.pl.patch \
+  && patch gribftpget.pl < ~/gribftpget.pl.patch \
+  && rm ~/gribftpget.pl.patch
+
 ENV PATH="${BASEDIR}/bin:${PATH}"
 
 #

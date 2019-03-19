@@ -1,0 +1,20 @@
+--- gribftpget.pl	2015-07-11 18:13:54.000000000 +0200
++++ gribftpget.1.pl	2019-03-19 21:07:52.404274129 +0100
+@@ -256,7 +256,7 @@
+         #ARCHIVE-ADDED
+         if ( substr( $gribftpsite, 0, 7 ) eq 'http://' )
+         {
+-         `curl -v -s -f -o "${GRIBDIR}/${filename}" "${gribftpsite}/${FTPDIRECTORY}/${filename}" > $TMPFILE1 2>$TMPFILE2`;
++         `curl -L -v -s -f -o "${GRIBDIR}/${filename}" "${gribftpsite}/${FTPDIRECTORY}/${filename}" > $TMPFILE1 2>$TMPFILE2`;
+           #4test: print "curl -v -s -o ${GRIBDIR}/${filename} ${gribftpsite}/${FTPDIRECTORY}/${filename} > $TMPFILE1 2>$TMPFILE2 \n";
+         }
+         else
+@@ -264,7 +264,7 @@
+           $ID =~ s/ /:/;
+           #silent:  `curl -s --user $ID $ftpoptions --disable-epsv -o "${GRIBDIR}/${filename}" "ftp://${gribftpsite}/${FTPDIRECTORY}/${filename}" > $TMPFILE1 2>$TMPFILE2`;
+           #verbose:
+-          `curl -v -s --user $ID $ftpoptions --disable-epsv -o "${GRIBDIR}/${filename}" "ftp://${gribftpsite}/${FTPDIRECTORY}/${filename}" > $TMPFILE1 2>$TMPFILE2`;
++          `curl -L -v -s --user $ID $ftpoptions --disable-epsv -o "${GRIBDIR}/${filename}" "ftp://${gribftpsite}/${FTPDIRECTORY}/${filename}" > $TMPFILE1 2>$TMPFILE2`;
+         }
+       }
+       ### should send back most recent command return code
