@@ -3,3 +3,6 @@
 rangs.tgz
 raspGM-bin.tgz
 raspGM.tgz
+
+paralert/__pycache__/
+paralert/paraglidable_forecast/
