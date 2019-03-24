@@ -2,7 +2,7 @@ from googleapiclient import discovery
 import json
 from jinja2 import Template
 
-instance_launch_template = r'''{
+instance_launch_template = r"""{
     "kind": "compute#instance",
     "name": "{{ image }}",
     "zone": "projects/{{ project_id }}/zones/{{ zone }}",
@@ -73,7 +73,7 @@ instance_launch_template = r'''{
             ]
         }
     ]
-}'''
+}"""
 
 
 def launch_instance(request):
@@ -94,38 +94,41 @@ def launch_instance(request):
     Returns:
         Always OK. Isn't that great?
     """
-    compute = discovery.build('compute', 'v1')
+    compute = discovery.build("compute", "v1")
 
     request_json = request.get_json()
-    expected_keys = ['image', 'project_id', 'zone', 'instance_type', 'env']
+    expected_keys = ["image", "project_id", "zone", "instance_type", "env"]
     if request_json and all(key in request_json for key in expected_keys):
-        if request_json['env'] == '':
-            env_vars = ''
+        if request_json["env"] == "":
+            env_vars = ""
         else:
-            env_vars = r'    env:\n'
-            for key, value in request_json['env'].items():
-                env_vars += r'    - name: {key}\n      '.format(key=key)
-                env_vars += r'value: {value}\n'.format(value=value)
+            env_vars = r"    env:\n"
+            for key, value in request_json["env"].items():
+                env_vars += r"    - name: {key}\n      ".format(key=key)
+                env_vars += r"value: {value}\n".format(value=value)
     else:
-        return 'ERROR : Can\'t launch instance, request parameter(s) missing'
+        return "ERROR : Can't launch instance, request parameter(s) missing"
 
     template = Template(instance_launch_template)
     filled_instance_launch_template = template.render(
-        project_id=request_json['project_id'],
-        image=request_json['image'],
-        zone=request_json['zone'],
-        instance_type=request_json['instance_type'],
-        env_vars=env_vars
-        )
+        project_id=request_json["project_id"],
+        image=request_json["image"],
+        zone=request_json["zone"],
+        instance_type=request_json["instance_type"],
+        env_vars=env_vars,
+    )
     print(filled_instance_launch_template)
     body = json.loads(filled_instance_launch_template)
 
-    print(compute.instances().insert(
-        project=request_json['project_id'],
-        zone=request_json['zone'],
-        body=body).execute())
+    print(
+        compute.instances()
+        .insert(
+            project=request_json["project_id"], zone=request_json["zone"], body=body
+        )
+        .execute()
+    )
 
-    return 'OK'
+    return "OK"
 
 
 def delete_instance(request):
@@ -142,17 +145,21 @@ def delete_instance(request):
     Returns:
         Always OK. Isn't that great?
     """
-    compute = discovery.build('compute', 'v1')
+    compute = discovery.build("compute", "v1")
 
     request_json = request.get_json()
-    expected_keys = ['name', 'project_id', 'zone']
-    if not request_json \
-       or not all(key in request_json for key in expected_keys):
-        return 'ERROR : Can\'t delete instance, request parameter(s) missing'
+    expected_keys = ["name", "project_id", "zone"]
+    if not request_json or not all(key in request_json for key in expected_keys):
+        return "ERROR : Can't delete instance, request parameter(s) missing"
 
-    print(compute.instances().delete(
-        project=request_json['project_id'],
-        zone=request_json['zone'],
-        instance=request_json['name']).execute())
+    print(
+        compute.instances()
+        .delete(
+            project=request_json["project_id"],
+            zone=request_json["zone"],
+            instance=request_json["name"],
+        )
+        .execute()
+    )
 
-    return 'OK'
+    return "OK"
