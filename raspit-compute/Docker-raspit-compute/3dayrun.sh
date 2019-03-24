@@ -23,12 +23,11 @@ function stop_instance {
 function upload {
   if [[ -n "$GCS_BUCKET" ]]
   then
-    echo "uploading "$1" to "$GCS_BUCKET" GCS bucket"
-    gsutil rm -r gs://$GCS_BUCKET/$2_inprogress
-    gsutil -m cp /root/rasp/$1/wrfout*d02*00:00 gs://$GCS_BUCKET/$2_inprogress/
+    echo "Uploading "$2" run of "$1" to "$GCS_BUCKET" GCS bucket"
     gsutil rm -r gs://$GCS_BUCKET/$2
-    gsutil -m mv gs://$GCS_BUCKET/$2_inprogress/* gs://$GCS_BUCKET/$2
-    gcloud pubsub topics publish $PUBSUB_TOPIC --message="Run finished" --attribute path=$GCS_BUCKET/$2
+    gsutil -m cp /root/rasp/$1/wrfout*d02*00:00 gs://$GCS_BUCKET/$2/
+    echo "Publishing event to "$PUBSUB_TOPIC
+    gcloud pubsub topics publish $PUBSUB_TOPIC --message="run_finished_event" --attribute path=$GCS_BUCKET/$2
   else
     echo "WARNING : GCS_BUCKET environment variable not set. No upload will be done."
   fi
@@ -50,7 +49,6 @@ function one_day_run {
   sweep $1
   export START_HOUR=$2
   cd /root/rasp
-  echo "------------------------------------"
   echo "Running "$1" with START_HOUR="$2
   runGM $1
   echo $1" with START_HOUR="$2" done."
@@ -80,7 +78,7 @@ else
 fi
 
 # Run launch
-one_day_run PYR2 33
-one_day_run PYR2 57
+#one_day_run PYR2 33
+#one_day_run PYR2 57
 one_day_run PYR2 9
 stop_instance
