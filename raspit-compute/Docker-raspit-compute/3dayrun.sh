@@ -54,7 +54,7 @@ function one_day_run {
   echo "Running "$1" with START_HOUR="$2
   runGM $1
   echo $1" with START_HOUR="$2" done."
-  upload $1 $(date --date=$((($2 / 24) + 1))" days" +%Y%m%d)
+  upload $1 $(date --date=$(($2 / 24))" days" +%Y%m%d)
   sweep $1
 }
 
