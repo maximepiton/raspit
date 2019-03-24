@@ -35,7 +35,7 @@ def three_day_run():
                'instance_type': 'n1-highcpu-8',
                'env': {'GCS_BUCKET': 'raspit-compute',
                        'PUBSUB_TOPIC':
-                        'gcr.io/' + project_id + '/raspit-compute'}}
+                        'compute-events'}}
 
     r = requests.post(url, json=payload)
     return 'OK'
