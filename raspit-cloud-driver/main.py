@@ -32,7 +32,7 @@ instance_launch_template = r"""{
             "autoDelete": true,
             "deviceName": "{{ image }}",
             "initializeParams": {
-                "sourceImage": "projects/cos-cloud/global/images/cos-stable-68-10718-102-0",
+                "sourceImage": "projects/cos-cloud/global/images/cos-stable-73-11647-121-0",
                 "diskType": "projects/{{ project_id }}/zones/{{ zone }}/diskTypes/pd-standard",
                 "diskSizeGb": "20"
             }
@@ -56,7 +56,7 @@ instance_launch_template = r"""{
     ],
     "description": "",
     "labels": {
-        "container-vm": "cos-stable-68-10718-102-0"
+        "container-vm": "cos-stable-73-11647-121-0"
     },
     "scheduling": {
         "preemptible": false,
