@@ -78,6 +78,9 @@ $ docker build -t gcr.io/<gcp_project_id>/raspit-wrf-to-json .
 $ docker push gcr.io/<gcp_project_id>/raspit-wrf-to-json
 ```
 
+## Simplified architecture diagram
+
+![raspit architecture diagram](raspit_architecture_diagram.png)
 
 ## Based on the work of
 
