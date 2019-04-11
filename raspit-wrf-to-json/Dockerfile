@@ -14,4 +14,4 @@ ENV LANG C.UTF-8
 
 COPY wrf_to_json.py /src/
 
-CMD ["python /src/wrf_to_json.py"]
+CMD ["python", "/src/wrf_to_json.py"]
