@@ -16,6 +16,38 @@ $ gcloud beta functions deploy launch_instance --runtime python37 --trigger-http
 $ gcloud beta functions deploy delete_instance --runtime python37 --trigger-http
 ```
 
+### raspit-wrf-to-json
+
+Docker image used to post-process raw WRF files. It fetches WRF files from a Google
+Cloud Storage bucket, generates one JSON document per WRF file, containing variables
+we want to extract, and push them to Google Cloud Datastore.
+
+#### How to deploy
+```shell
+$ docker build -t gcr.io/<gcp_project_id>/raspit-wrf-to-json .
+$ docker push gcr.io/<gcp_project_id>/raspit-wrf-to-json
+```
+
+#### How to launch locally
+
+You have to generate a service account JSON key from the IAM GCP console first.
+
+```shell
+$ docker run -it -v $(pwd):/src/ -v <path_to_json_key>:/key.json --rm gcr.io/<gcp_project_id>/raspit-wrf-to-json:latest bash
+# python wrf_to_json.py --bucket <bucket_name> --prefix <prefix>
+```
+
+### raspit-wrf-to-json-dequeuer
+
+Bundles two Google Cloud Functions, triggered by a Cloud Pub/Sub topic :
+* **launch_instance** : Spins up a Google Compute Engine instance, and starts a specific docker container on it ;
+* **delete_instance** : Stops and deletes a specific instance. 
+
+#### How to deploy
+```shell
+$ gcloud functions deploy dequeue --runtime python37 --trigger-topic compute-events
+```
+
 ### raspit-compute-image
 
 WRF-ARW Weather forecast compute image for SW France. Include 2 docker images :
