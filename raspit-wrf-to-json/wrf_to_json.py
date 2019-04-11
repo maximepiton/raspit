@@ -1,4 +1,4 @@
-from os import path
+from os import path, environ
 import logging
 import datetime
 import click
@@ -103,14 +103,12 @@ def push_forecast(datastore_client, forecast):
 @click.command()
 @click.option(
     "--bucket-name",
-    prompt=True,
-    default=lambda: os.environ.get("GCS_BUCKET", ""),
+    default=lambda: environ.get("GCS_BUCKET", ""),
     help="Bucket that contains files to process",
 )
 @click.option(
     "--prefix",
-    prompt=True,
-    default=lambda: os.environ.get("PREFIX", ""),
+    default=lambda: environ.get("PREFIX", ""),
     help="'Folder' in the bucket that contains files to process",
 )
 def wrf_to_json(bucket_name, prefix):
