@@ -7,16 +7,6 @@ function sweep {
   rm -f met_em.d* ; rm -f wrfout* ; rm -f met_em* ; rm -f UNGRIB:* ; rm -f wrfinput_* ; rm -f GRIB/* ; rm -f OUT/*
 }
 
-# Function that call a google cloud function to stop itself
-function stop_instance {
-  PROJECT_ID=$(curl "http://metadata.google.internal/computeMetadata/v1/project/project-id" -H "Metadata-Flavor: Google")
-  INSTANCE_NAME=$(curl "http://metadata.google.internal/computeMetadata/v1/instance/name" -H "Metadata-Flavor: Google")
-  INSTANCE_REGION_FULL=$(curl "http://metadata.google.internal/computeMetadata/v1/instance/zone" -H "Metadata-Flavor: Google")
-  re="(.*\/)(.*)"
-  if [[ $INSTANCE_REGION_FULL =~ $re ]]; then INSTANCE_REGION=${BASH_REMATCH[2]}; fi
-  gcloud functions call delete_instance --data "{\"project_id\":\"$PROJECT_ID\", \"name\":\"$INSTANCE_NAME\", \"zone\":\"$INSTANCE_REGION\"}"
-}
-
 # Function that uploads output images to a ftp server or a GCS bucket, 
 # depending on USE_FTP and GCS_BUCKET environment variables
 # Params : $1 : Domain ; $2 : run date
@@ -50,6 +40,7 @@ function one_day_run {
   export START_HOUR=$2
   cd /root/rasp
   echo "Running "$1" with START_HOUR="$2
+  #dd if=/dev/zero of=PYR2/wrfout_d02_2019-04-07_16:00:00 count=50000 bs=1024
   runGM $1
   echo $1" with START_HOUR="$2" done."
   upload $1 $(date --date=$(($2 / 24))" days" +%Y%m%d)
@@ -81,4 +72,3 @@ fi
 #one_day_run PYR2 33
 #one_day_run PYR2 57
 one_day_run PYR2 9
-stop_instance

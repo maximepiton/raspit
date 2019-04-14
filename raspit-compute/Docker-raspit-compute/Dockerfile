@@ -11,7 +11,8 @@ COPY PYR3/* $BASEDIR/PYR3/
 RUN cp $BASEDIR/PYR2/namelist.input $BASEDIR/PYR2/namelist.input.template && cp $BASEDIR/PYR2/namelist.wps $BASEDIR/PYR2/namelist.wps.template
 RUN cp $BASEDIR/PYR3/namelist.input $BASEDIR/PYR3/namelist.input.template && cp $BASEDIR/PYR3/namelist.wps $BASEDIR/PYR3/namelist.wps.template
 COPY 3dayrun.sh $BASEDIR/
+COPY kill_me.sh /root/
 
 WORKDIR /root/rasp/
 
-CMD ["./3dayrun.sh"]
+CMD ./3dayrun.sh && ./kill_me.sh
