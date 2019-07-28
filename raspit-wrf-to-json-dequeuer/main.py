@@ -29,16 +29,15 @@ def dequeue(data, context):
         )
     )
 
-    # Call raspit-driver
+    # Call raspit-cloud-driver
     project_id = os.getenv("GCLOUD_PROJECT")
     url = "https://us-central1-" + project_id + ".cloudfunctions.net/launch_instance"
     payload = {
         "project_id": project_id,
         "image": "raspit-wrf-to-json",
         "zone": "us-east1-c",
-        "instance_type": "f1-micro",
+        "instance_type": "n1-highcpu-2",
         "env": {"GCS_BUCKET": bucket, "PREFIX": prefix},
     }
-
     r = requests.post(url, json=payload)
-    print("Request status: {}".format(r.status_code))
+    r.raise_for_status()

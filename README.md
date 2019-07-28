@@ -39,9 +39,9 @@ $ docker run -it -v $(pwd):/src/ -v <path_to_json_key>:/key.json --rm gcr.io/<gc
 
 ### raspit-wrf-to-json-dequeuer
 
-Bundles two Google Cloud Functions, triggered by a Cloud Pub/Sub topic :
-* **launch_instance** : Spins up a Google Compute Engine instance, and starts a specific docker container on it ;
-* **delete_instance** : Stops and deletes a specific instance. 
+Bundles a Google Cloud Function, triggered by a Cloud Pub/Sub topic, that
+starts a raspit-wrf-to-json container on a new instance, with specific
+environment variables.
 
 #### How to deploy
 ```shell
