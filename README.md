@@ -64,6 +64,7 @@ $ cd raspit-compute/Docker-rasp-wrfv3
 $ wget http://rasp-uk.uk/SOFTWARE/WRFV3.x/raspGM.tgz
 $ wget http://rasp-uk.uk/SOFTWARE/WRFV3.x/raspGM-bin.tgz
 $ wget http://rasp-uk.uk/SOFTWARE/WRFV3.x/rangs.tgz
+$ wget https://github.com/WRF-CMake/WPS/releases/download/WPS-CMake-4.0.2/wps-cmake-4.0.2-serial-basic-release-linux.tar.xz
 $ docker build -t rasp-wrfv3 .
 $ cd ../Docker-raspit-compute
 $ docker build -t gcr.io/<gcp_project_id>/raspit-compute .
@@ -74,10 +75,10 @@ $ docker push gcr.io/<gcp_project_id>/raspit-compute
 
 ```
 $ cd raspit-compute/Docker-raspit-compute
-docker run -it \
+$ docker run --rm -it \
     -e "DEV_ENV=y" \
     -v $(pwd):/root/rasp/Raspit-compute-image \
-    rasp-wrfv3
+    rasp-wrfv3 bash
 ```
 
 

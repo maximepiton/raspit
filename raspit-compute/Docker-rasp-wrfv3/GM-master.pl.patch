@@ -1,5 +1,5 @@
---- GM-master.pl.old	2017-09-13 20:14:40.289956591 +0200
-+++ GM-master.pl	2017-09-10 18:41:05.964434060 +0200
+--- bin/GM-master_old.pl	2019-07-27 14:16:22.165873852 +0200
++++ bin/GM-master.pl	2019-07-27 14:16:52.206682787 +0200
 @@ -1812,6 +1812,9 @@
                  }
                }
@@ -10,3 +10,16 @@
  
                ### ALLOW DIFFERENT STARTS FOR DIFFERENT DOMAINS
                for ( $idomain=2 ; $idomain<=$MAXDOMAIN{$regionname}[$IWINDOW] ; $idomain++ ) {
+@@ -3531,9 +3534,9 @@
+              }
+              elsif ( $gribftpsite eq 'http://nomads.ncep.noaa.gov' && $GRIBFILE_MODEL eq 'GFSN' || $gribftpsite eq 'http://nomads.ncep.noaa.gov' && $GRIBFILE_MODEL eq 'GFSA' ||  $gribftpsite eq 'http://nomads.ncep.noaa.gov' && $GRIBFILE_MODEL eq 'AVN' )
+              {
+-               $gribftpdirectory[1] = sprintf 'gfs.%04d%02d%02d%02d',$jyr4,$jmo2,$jda2,$fileanaltimes{$ifile};
+-               $gribftpdirectory[0] = sprintf 'gfs.%04d%02d%02d%02d',$jyr4m1,$jmo2m1,$jda2m1,$fileanaltimes{$ifile};
+-               $gribftpdirectory[2] = sprintf 'gfs.%04d%02d%02d%02d',$jyr4p1,$jmo2p1,$jda2p1,$fileanaltimes{$ifile};
++               $gribftpdirectory[1] = sprintf 'gfs.%04d%02d%02d/%02d',$jyr4,$jmo2,$jda2,$fileanaltimes{$ifile};
++               $gribftpdirectory[0] = sprintf 'gfs.%04d%02d%02d/%02d',$jyr4m1,$jmo2m1,$jda2m1,$fileanaltimes{$ifile};
++               $gribftpdirectory[2] = sprintf 'gfs.%04d%02d%02d/%02d',$jyr4p1,$jmo2p1,$jda2p1,$fileanaltimes{$ifile};
+              }
+              $filenamedirectory = $gribftpdirectory[$filenamedirectoryno{$ifile}];
+              $filename{$ifile} = $file;

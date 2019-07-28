@@ -27,6 +27,7 @@ WORKDIR /root/
 ADD raspGM.tgz $BASEDIR
 ADD raspGM-bin.tgz $BASEDIR
 ADD rangs.tgz $BASEDIR
+ADD wps-cmake-4.0.2-serial-basic-release-linux.tar.xz $BASEDIR/bin
 
 # Patch files with fixes
 COPY GM-master.pl.patch /root/
