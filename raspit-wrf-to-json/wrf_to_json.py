@@ -3,7 +3,7 @@ import logging
 import datetime
 import click
 from netCDF4 import Dataset
-from wrf import getvar, xy_to_ll
+from wrf import getvar
 from google.cloud import datastore, storage
 
 
@@ -30,14 +30,13 @@ def download_wrf_files(bucket_name, prefix, out_folder):
         with open(out_file_path, "wb") as f:
             blob.download_to_file(f)
         out_path_list.append(out_file_path)
-        break
 
     return out_path_list
 
 
 def process_wrf_file(file_path, two_d_vars, three_d_vars):
     """
-    Extract variables from a wrf file into a dictionary
+    Extract variables from a wrf file into a list of forecast dictionaries
 
     Args:
         file_path (str): Path of the wrf file to process
@@ -45,11 +44,17 @@ def process_wrf_file(file_path, two_d_vars, three_d_vars):
         three_d_vars (list): List of 3D variables to extract from the dataset
 
     Returns:
-        Dict: Forecast dictionary
+        List: Forecasts
     """
     logging.info("Post-processing {}".format(file_path))
 
     dataset = Dataset(file_path)
+
+    date = datetime.datetime.strptime(
+        getattr(dataset, "START_DATE"), "%Y-%m-%d_%H:%M:%S"
+    )
+
+    forecast_list = list()
 
     # Extract all variables first
     extracted_vars = {}
@@ -61,7 +66,6 @@ def process_wrf_file(file_path, two_d_vars, three_d_vars):
     # Loop over grid to extract all vars
     for x in range(getattr(dataset, "WEST-EAST_GRID_DIMENSION") - 1):
         for y in range(getattr(dataset, "SOUTH-NORTH_GRID_DIMENSION") - 1):
-            [lat, lon] = xy_to_ll(dataset, x, y)
             json_out = {}
             for variable in two_d_vars:
                 json_out[variable.lower()] = extracted_vars[variable][
@@ -73,31 +77,34 @@ def process_wrf_file(file_path, two_d_vars, three_d_vars):
                     :, y, x
                 ].values.tolist()
 
-    # Enrich document with forecast date
-    json_out["date"] = datetime.datetime.strptime(
-        getattr(dataset, "START_DATE"), "%Y-%m-%d_%H:%M:%S"
-    )
+            # Enrich document with forecast date
+            json_out["date"] = date
 
-    return json_out
+            forecast_list.append(json_out)
+
+    return forecast_list
 
 
-def push_forecast(datastore_client, forecast):
+def push_forecast(datastore_client, forecast_list):
     """
     Push a dictionary forecast to cloud datastore
 
     Args:
         datastore_client (google.cloud.datastore.client): datastore
             client that will be used to do the requests
-        forecast (dict): Forecast dictionary
+        forecast (List): List of forecast dictionaries
 
     Returns:
         -
     """
     logging.info("Pushing forecast to cloud datastore")
-    key = datastore_client.key("Forecast")
-    entity = datastore.Entity(key=key)
-    entity.update(forecast)
-    datastore_client.put(entity)
+    entities = list()
+    for forecast in forecast_list:
+        key = datastore_client.key("Forecast")
+        entity = datastore.Entity(key=key)
+        entity.update(forecast)
+        entities.append(entity)
+    datastore_client.put_multi(entities)
 
 
 @click.command()
@@ -121,8 +128,8 @@ def wrf_to_json(bucket_name, prefix):
 
     datastore_client = datastore.Client()
     for file_path in wrf_files:
-        forecast_dict = process_wrf_file(file_path, two_d_vars, three_d_vars)
-        push_forecast(datastore_client, forecast_dict)
+        forecast_list = process_wrf_file(file_path, two_d_vars, three_d_vars)
+        push_forecast(datastore_client, forecast_list)
 
     logging.info("WRF files post-processing done")
 

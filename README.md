@@ -106,7 +106,6 @@ WRF post-processing docker image. Upon startup, pulls events from a Google Pub/S
 #### How to deploy
 
 ```shell
-$ cd ../raspit-wrf-to-json
 $ docker build -t gcr.io/<gcp_project_id>/raspit-wrf-to-json .
 $ docker push gcr.io/<gcp_project_id>/raspit-wrf-to-json
 ```
