@@ -17,7 +17,7 @@ function upload {
     gsutil rm -r gs://$GCS_BUCKET/$2
     gsutil -m cp /root/rasp/$1/wrfout*d02*00:00 gs://$GCS_BUCKET/$2/
     echo "Publishing event to "$PUBSUB_TOPIC
-    gcloud pubsub topics publish $PUBSUB_TOPIC --message="run_finished_event" --attribute path=$GCS_BUCKET/$2
+    gcloud pubsub topics publish $PUBSUB_TOPIC --message="run_finished_event" --attribute bucket=$GCS_BUCKET,prefix=$2
   else
     echo "WARNING : GCS_BUCKET environment variable not set. No upload will be done."
   fi
