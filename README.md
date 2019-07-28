@@ -12,8 +12,8 @@ Bundles two Google Cloud Functions, triggered by HTTP calls :
 
 #### How to deploy
 ```shell
-$ gcloud beta functions deploy launch_instance --runtime python37 --trigger-http
-$ gcloud beta functions deploy delete_instance --runtime python37 --trigger-http
+$ gcloud functions deploy launch_instance --runtime python37 --trigger-http
+$ gcloud functions deploy delete_instance --runtime python37 --trigger-http
 ```
 
 ### raspit-wrf-to-json

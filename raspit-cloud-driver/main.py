@@ -1,4 +1,6 @@
 from googleapiclient import discovery
+from flask import jsonify
+import time
 import json
 from jinja2 import Template
 
@@ -17,6 +19,10 @@ instance_launch_template = r"""{
             {
                 "key": "gce-container-declaration",
                 "value": "spec:\n  containers:\n  - name: raspit-compute\n    image: gcr.io/{{ project_id }}/{{ image }}\n{{ env_vars }}    stdin: false\n    tty: false\n    restartPolicy: Never\n"
+            },
+            {
+                "key": "google-logging-enabled",
+                "value": "true"
             }
         ]
     },
@@ -76,6 +82,27 @@ instance_launch_template = r"""{
 }"""
 
 
+def wait_for_operation(compute, project, zone, operation_name, max_wait_seconds=120):
+    print("Waiting for operation to finish...")
+    end_time = time.time() + max_wait_seconds
+    while time.time() < end_time:
+        result = (
+            compute.zoneOperations()
+            .get(project=project, zone=zone, operation=operation_name)
+            .execute()
+        )
+
+        if result["status"] == "DONE":
+            print("done.")
+            if "error" in result:
+                raise Exception(result["error"])
+            return result
+
+        time.sleep(1)
+    else:
+        raise Exception("Operation timed out")
+
+
 def launch_instance(request):
     """ HTTP Cloud Function.
         Spawn an instance and launch a docker container on it,
@@ -120,12 +147,16 @@ def launch_instance(request):
     print(filled_instance_launch_template)
     body = json.loads(filled_instance_launch_template)
 
-    print(
+    operation = (
         compute.instances()
         .insert(
             project=request_json["project_id"], zone=request_json["zone"], body=body
         )
         .execute()
+    )
+
+    wait_for_operation(
+        compute, request_json["project_id"], request_json["zone"], operation["name"]
     )
 
     return "OK"
