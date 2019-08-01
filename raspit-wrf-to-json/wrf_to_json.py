@@ -1,10 +1,12 @@
 from os import path, environ
 import logging
 import datetime
+import math
 import click
+import numpy
 from netCDF4 import Dataset
 from wrf import getvar
-from google.cloud import datastore, storage
+from google.cloud import firestore, storage
 
 
 def download_wrf_files(bucket_name, prefix, out_folder):
@@ -19,7 +21,7 @@ def download_wrf_files(bucket_name, prefix, out_folder):
     Returns:
         List: List of path of files downloaded
     """
-    client = storage.Client(project="voltaic-layout-207517")
+    client = storage.Client(project="raspit-248118")
     bucket = client.get_bucket(bucket_name)
     blobs = bucket.list_blobs(prefix=prefix)
 
@@ -63,6 +65,13 @@ def process_wrf_file(file_path, two_d_vars, three_d_vars):
     for variable in three_d_vars:
         extracted_vars[variable] = getvar(dataset, variable)
 
+    logging.info(
+        "Grid size: {}x{}".format(
+            getattr(dataset, "WEST-EAST_GRID_DIMENSION"),
+            getattr(dataset, "SOUTH-NORTH_GRID_DIMENSION"),
+        )
+    )
+
     # Loop over grid to extract all vars
     for x in range(getattr(dataset, "WEST-EAST_GRID_DIMENSION") - 1):
         for y in range(getattr(dataset, "SOUTH-NORTH_GRID_DIMENSION") - 1):
@@ -85,26 +94,45 @@ def process_wrf_file(file_path, two_d_vars, three_d_vars):
     return forecast_list
 
 
-def push_forecast(datastore_client, forecast_list):
+def push_forecast(firestore_client, forecast_list, batch_size=400):
     """
-    Push a dictionary forecast to cloud datastore
+    Push a dictionary forecast to cloud firestore
 
     Args:
-        datastore_client (google.cloud.datastore.client): datastore
+        firestore_client (google.cloud.firestore.client): firestore
             client that will be used to do the requests
         forecast (List): List of forecast dictionaries
 
     Returns:
         -
     """
-    logging.info("Pushing forecast to cloud datastore")
-    entities = list()
-    for forecast in forecast_list:
-        key = datastore_client.key("Forecast")
-        entity = datastore.Entity(key=key)
-        entity.update(forecast)
-        entities.append(entity)
-    datastore_client.put_multi(entities)
+
+    logging.info("Pushing forecast to cloud firestore")
+    collection = firestore_client.collection(u"forecast_data")
+
+    forecast_batches = numpy.array_split(
+        numpy.asarray(forecast_list), math.ceil(len(forecast_list) / batch_size)
+    )
+
+    logging.info(
+        "Splitting into {} batches of {} elements".format(
+            len(forecast_batches), len(forecast_batches[0].tolist())
+        )
+    )
+
+    for forecast_batch in forecast_batches:
+        batch = firestore_client.batch()
+        for forecast in forecast_batch.tolist():
+            doc = (
+                collection.document(forecast["date"].strftime("%Y%m%d%H%M"))
+                .collection("forecast")
+                .document()
+            )
+            forecast["geopoint"] = firestore.GeoPoint(forecast["lat"], forecast["lon"])
+            forecast.pop("lon", None)
+            forecast.pop("lat", None)
+            batch.set(doc, forecast)
+        batch.commit()
 
 
 @click.command()
@@ -121,17 +149,19 @@ def push_forecast(datastore_client, forecast_list):
 def wrf_to_json(bucket_name, prefix):
     logging.info("Starting WRF post-processing")
     wrf_files = download_wrf_files(bucket_name, prefix, "/tmp")
+    # wrf_files = ["/src/20190327_wrfout_d02_2019-03-26_09_00_00"]
 
     # Variables to extract from the raw wrf file
     two_d_vars = ["PBLH", "RAINNC", "ter", "lon", "lat"]
     three_d_vars = ["z", "U", "V", "CLDFRA", "tc", "td", "p"]
 
-    datastore_client = datastore.Client()
+    firestore_client = firestore.Client()
     for file_path in wrf_files:
         forecast_list = process_wrf_file(file_path, two_d_vars, three_d_vars)
-        push_forecast(datastore_client, forecast_list)
+        push_forecast(firestore_client, forecast_list)
 
     logging.info("WRF files post-processing done")
+
 
 if __name__ == "__main__":
     logging.basicConfig(

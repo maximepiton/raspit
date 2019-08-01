@@ -33,8 +33,8 @@ $ docker push gcr.io/<gcp_project_id>/raspit-wrf-to-json
 You have to generate a service account JSON key from the IAM GCP console first.
 
 ```shell
-$ docker run -it -v $(pwd):/src/ -v <path_to_json_key>:/key.json --rm gcr.io/<gcp_project_id>/raspit-wrf-to-json:latest bash
-# python wrf_to_json.py --bucket <bucket_name> --prefix <prefix>
+$ docker run -it -e GOOGLE_APPLICATION_CREDENTIALS="/key.json" -v $(pwd):/src/ -v <path_to_json_key>:/key.json --rm gcr.io/<gcp_project_id>/raspit-wrf-to-json:latest bash
+# python wrf_to_json.py --bucket-name <bucket_name> --prefix <prefix>
 ```
 
 ### raspit-wrf-to-json-dequeuer
@@ -81,7 +81,6 @@ $ docker run --rm -it \
     rasp-wrfv3 bash
 ```
 
-
 ### raspit-web
 
 Google App Engine flask-based webserver. Also includes an App Engine cron job, that calls the /compute-launch (see below) route daily.
@@ -98,16 +97,6 @@ Google App Engine flask-based webserver. Also includes an App Engine cron job, t
 $ cd raspit-web
 $ gcloud app deploy
 $ gcloud app deploy cron.yaml
-```
-
-### raspit-wrf-to-json
-WRF post-processing docker image. Upon startup, pulls events from a Google Pub/Sub queue, that corresponds to raw wrfout files that need to be processed. The processing corresponds to extracting and interpolating values from the wrfout files (fetch from Google Cloud Storage), put it in JSON format, and send the result to Google Cloud Datastore.
-
-#### How to deploy
-
-```shell
-$ docker build -t gcr.io/<gcp_project_id>/raspit-wrf-to-json .
-$ docker push gcr.io/<gcp_project_id>/raspit-wrf-to-json
 ```
 
 ## Simplified architecture diagram
