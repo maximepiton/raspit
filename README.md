@@ -16,7 +16,7 @@ $ gcloud functions deploy launch_instance --runtime python37 --trigger-http
 $ gcloud functions deploy delete_instance --runtime python37 --trigger-http
 ```
 
-### raspit-wrf-to-json
+### raspit-forecast-extractor
 
 Docker image used to post-process raw WRF files. It fetches WRF files from a Google
 Cloud Storage bucket, generates one JSON document per WRF file, containing variables
@@ -24,8 +24,8 @@ we want to extract, and push them to Google Cloud Datastore.
 
 #### How to deploy
 ```shell
-$ docker build -t gcr.io/<gcp_project_id>/raspit-wrf-to-json .
-$ docker push gcr.io/<gcp_project_id>/raspit-wrf-to-json
+$ docker build -t gcr.io/<gcp_project_id>/raspit-forecast-extractor .
+$ docker push gcr.io/<gcp_project_id>/raspit-forecast-extractor
 ```
 
 #### How to launch locally
@@ -33,7 +33,7 @@ $ docker push gcr.io/<gcp_project_id>/raspit-wrf-to-json
 You have to generate a service account JSON key from the IAM GCP console first.
 
 ```shell
-$ docker run -it -e GOOGLE_APPLICATION_CREDENTIALS="/key.json" -v $(pwd):/src/ -v <path_to_json_key>:/key.json --rm gcr.io/<gcp_project_id>/raspit-wrf-to-json:latest bash
+$ docker run -it -e GOOGLE_APPLICATION_CREDENTIALS="/key.json" -v $(pwd):/src/ -v <path_to_json_key>:/key.json --rm gcr.io/<gcp_project_id>/raspit-forecast-extractor:latest bash
 # python wrf_to_json.py --bucket-name <bucket_name> --prefix <prefix>
 ```
 

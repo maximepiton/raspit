@@ -7,3 +7,5 @@ wps-cmake-4.0.2-serial-basic-release-linux.tar.xz
 
 paralert/__pycache__/
 paralert/paraglidable_forecast/
+__pycache__
+wrfout
