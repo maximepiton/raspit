@@ -1,7 +1,9 @@
+import os
 from googleapiclient import discovery
 from flask import jsonify
 import time
 import json
+import base64
 from jinja2 import Template
 
 instance_launch_template = r"""{
@@ -103,45 +105,44 @@ def wait_for_operation(compute, project, zone, operation_name, max_wait_seconds=
         raise Exception("Operation timed out")
 
 
-def launch_instance(request):
-    """ HTTP Cloud Function.
+def launch_instance(event, context):
+    """ Background Cloud Function to be triggered by Pub/Sub.
         Spawn an instance and launch a docker container on it,
         with optional environment variables.
     Args:
-        request (flask.Request): The request object.
-        <http://flask.pocoo.org/docs/0.12/api/#flask.Request>
-        Must contain a JSON payload with the following :
-            '{"project_id":"<project id>",
-              "image":"<docker iamge to spawn>",
+        event (dict): The dictionary with data specific to
+            this type of event.
+
+        Event data must be a JSON formatted with the following
+        content:
+            json_data'{"image":"<docker image to spawn>",
               "zone":"<zone to launch the instance in>",
               "instance_type":"<instance type>",
               "env":
                 {"MY_ENV_VAR": "<value>"}
             }'
-    Returns:
-        Always OK. Isn't that great?
     """
     compute = discovery.build("compute", "v1")
 
-    request_json = request.get_json()
-    expected_keys = ["image", "project_id", "zone", "instance_type", "env"]
-    if request_json and all(key in request_json for key in expected_keys):
-        if request_json["env"] == "":
-            env_vars = ""
-        else:
-            env_vars = r"    env:\n"
-            for key, value in request_json["env"].items():
-                env_vars += r"    - name: {key}\n      ".format(key=key)
-                env_vars += r"value: {value}\n".format(value=value)
+    data = base64.b64decode(event['data']).decode('utf-8')
+    json_data = json.loads(data)
+
+    if json_data["env"] == "":
+        env_vars = ""
     else:
-        return "ERROR : Can't launch instance, request parameter(s) missing"
+        env_vars = r"    env:\n"
+        for key, value in json_data["env"].items():
+            env_vars += r"    - name: {key}\n      ".format(key=key)
+            env_vars += r"value: {value}\n".format(value=value)
+
+    project_id = os.getenv("GCLOUD_PROJECT")
 
     template = Template(instance_launch_template)
     filled_instance_launch_template = template.render(
-        project_id=request_json["project_id"],
-        image=request_json["image"],
-        zone=request_json["zone"],
-        instance_type=request_json["instance_type"],
+        project_id=project_id,
+        image=json_data["image"],
+        zone=json_data["zone"],
+        instance_type=json_data["instance_type"],
         env_vars=env_vars,
     )
     print(filled_instance_launch_template)
@@ -150,47 +151,40 @@ def launch_instance(request):
     operation = (
         compute.instances()
         .insert(
-            project=request_json["project_id"], zone=request_json["zone"], body=body
+            project=project_id, zone=json_data["zone"], body=body
         )
         .execute()
     )
 
     wait_for_operation(
-        compute, request_json["project_id"], request_json["zone"], operation["name"]
+        compute, project_id, json_data["zone"], operation["name"]
     )
 
-    return "OK"
 
-
-def delete_instance(request):
-    """ HTTP Cloud Function.
+def delete_instance(event, context):
+    """ Background Cloud Function to be triggered by Pub/Sub.
         Stop and delete an instance.
     Args:
-        request (flask.Request): The request object.
-        <http://flask.pocoo.org/docs/0.12/api/#flask.Request>
-        Must contain a JSON payload with the following :
-            '{"project_id":"<project id>",
-              "name":"<instance name>",
+        event (dict): The dictionary with data specific to
+            this type of event.
+
+        Event data must be a JSON formatted with the following
+        content:
+            '{"name":"<instance name>",
               "zone":"<zone that contains the instance>",
             }'
-    Returns:
-        Always OK. Isn't that great?
     """
     compute = discovery.build("compute", "v1")
 
-    request_json = request.get_json()
-    expected_keys = ["name", "project_id", "zone"]
-    if not request_json or not all(key in request_json for key in expected_keys):
-        return "ERROR : Can't delete instance, request parameter(s) missing"
+    data = base64.b64decode(event['data']).decode('utf-8')
+    json_data = json.loads(data)
 
     print(
         compute.instances()
         .delete(
-            project=request_json["project_id"],
-            zone=request_json["zone"],
-            instance=request_json["name"],
+            project=os.getenv("GCLOUD_PROJECT"),
+            zone=json_data["zone"],
+            instance=json_data["name"],
         )
         .execute()
     )
-
-    return "OK"

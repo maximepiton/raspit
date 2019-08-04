@@ -8,7 +8,7 @@ class Forecast {
      */
     constructor(forecast_json) {
         this.raw_json = forecast_json
-        this.nb_hours = Object.keys(this.raw_json.data).length;
+        this.nb_hours = Object.keys(this.raw_json.forecasts).length;
     }
 
     /**
@@ -19,7 +19,7 @@ class Forecast {
      * @return {number} Virtual z-level
      */
     get_virtual_level(z_in, hour) {
-        let z_array = this.raw_json.data[hour].z
+        let z_array = this.raw_json.forecasts[hour].z
         for (let lvl in z_array) {
             if (z_in < z_array[lvl]) { // we passed over the value
                 if (lvl == 0) { return false;  } else {
@@ -39,7 +39,9 @@ class Forecast {
      * @return {number} Interpolated value
      */
     get_interpolated_wrf_var(virtual_level, hour, wrf_var) {
-        let v_array = this.raw_json.data[hour][wrf_var]
+        console.log(hour);
+        console.log(wrf_var);
+        let v_array = this.raw_json.forecasts[hour][wrf_var]
         return v_array[Math.floor(virtual_level)] + (virtual_level - Math.floor(virtual_level)) *
               (v_array[Math.ceil(virtual_level)] - v_array[Math.floor(virtual_level)]);
     }
@@ -88,19 +90,19 @@ class Forecast {
         let row = $('<tr></tr>').appendTo(history_table);
         $('<td></td>').appendTo(row);
 
-        for (let hour in this.raw_json.data) {
+        for (let hour in this.raw_json.forecasts) {
             $('<th scope="col"></th>').text(hour).appendTo(row);
         }
 
         history_table.appendTo('#'.concat(container_id));
 
         let hour_id = 0;
-        for (let hour in this.raw_json.data) {
-            let pblh = this.raw_json.data[hour].pblh;
+        for (let hour in this.raw_json.forecasts) {
+            let pblh = this.raw_json.forecasts[hour].pblh;
             for (let z in z_levels) {
                 let virtual_level = this.get_virtual_level(z_levels[z], hour);
-                let umet = this.get_interpolated_wrf_var(virtual_level, hour, 'umet');
-                let vmet = this.get_interpolated_wrf_var(virtual_level, hour, 'vmet');
+                let umet = this.get_interpolated_wrf_var(virtual_level, hour, 'u');
+                let vmet = this.get_interpolated_wrf_var(virtual_level, hour, 'v');
                 let wind_speed = this.get_wind_speed(umet, vmet)
                 let wind_angle = this.get_wind_angle(umet, vmet)
 

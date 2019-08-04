@@ -17,7 +17,7 @@ function upload {
     gsutil rm -r gs://$GCS_BUCKET/$2
     gsutil -m cp /root/rasp/$1/wrfout*d02*00:00 gs://$GCS_BUCKET/$2/
     echo "Publishing event to "$PUBSUB_TOPIC
-    gcloud pubsub topics publish $PUBSUB_TOPIC --message="run_finished_event" --attribute bucket=$GCS_BUCKET,prefix=$2
+    gcloud pubsub topics publish $PUBSUB_TOPIC --message="$2"
   else
     echo "WARNING : GCS_BUCKET environment variable not set. No upload will be done."
   fi
@@ -40,10 +40,9 @@ function one_day_run {
   export START_HOUR=$2
   cd /root/rasp
   echo "Running "$1" with START_HOUR="$2
-  #dd if=/dev/zero of=PYR2/wrfout_d02_2019-04-07_16:00:00 count=50000 bs=1024
   runGM $1
   echo $1" with START_HOUR="$2" done."
-  upload $1 $(date --date=$(($2 / 24))" days" +%Y%m%d)
+  upload $1 $(date +%Y%m%d%k)
   sweep $1
 }
 

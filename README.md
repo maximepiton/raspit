@@ -12,11 +12,16 @@ Bundles two Google Cloud Functions, triggered by HTTP calls :
 
 #### How to deploy
 ```shell
-$ gcloud functions deploy launch_instance --runtime python37 --trigger-http
-$ gcloud functions deploy delete_instance --runtime python37 --trigger-http
+$ gcloud functions deploy launch_instance --runtime python37 --trigger-topic launch-instance
+$ gcloud functions deploy delete_instance --runtime python37 --trigger-topic delete-instance
+$ gcloud beta scheduler jobs create pubsub compute-launch \
+--schedule '0 5 * * *' \
+--topic launch-instance \
+--message-body '{"image": "raspit-compute", "zone": "us-east1-b", "instance_type": "n1-highcpu-8", "env": {"GCS_BUCKET": "raspit-compute", "PUBSUB_TOPIC": "run-finished"}}' \
+--time-zone 'Europe/Paris'
 ```
 
-### raspit-forecast-extractor
+### raspit-forecast-service
 
 Docker image used to post-process raw WRF files. It fetches WRF files from a Google
 Cloud Storage bucket, generates one JSON document per WRF file, containing variables
@@ -24,8 +29,8 @@ we want to extract, and push them to Google Cloud Datastore.
 
 #### How to deploy
 ```shell
-$ docker build -t gcr.io/<gcp_project_id>/raspit-forecast-extractor .
-$ docker push gcr.io/<gcp_project_id>/raspit-forecast-extractor
+$ gcloud builds submit -t gcr.io/<gcp_project_id>/raspit-forecast-service .
+$ gcloud beta run deploy --image gcr.io/raspit-248118/raspit-forecast-service --platform managed --region europe-west1 --update-env-vars GCS_BUCKET=raspit-compute --memory=1Gi
 ```
 
 #### How to launch locally
@@ -33,19 +38,8 @@ $ docker push gcr.io/<gcp_project_id>/raspit-forecast-extractor
 You have to generate a service account JSON key from the IAM GCP console first.
 
 ```shell
-$ docker run -it -e GOOGLE_APPLICATION_CREDENTIALS="/key.json" -v $(pwd):/src/ -v <path_to_json_key>:/key.json --rm gcr.io/<gcp_project_id>/raspit-forecast-extractor:latest bash
+$ docker run -it -e GOOGLE_APPLICATION_CREDENTIALS="/key.json" -v $(pwd):/src/ -v <path_to_json_key>:/key.json --rm gcr.io/<gcp_project_id>/raspit-forecast-service:latest bash
 # python wrf_to_json.py --bucket-name <bucket_name> --prefix <prefix>
-```
-
-### raspit-wrf-to-json-dequeuer
-
-Bundles a Google Cloud Function, triggered by a Cloud Pub/Sub topic, that
-starts a raspit-wrf-to-json container on a new instance, with specific
-environment variables.
-
-#### How to deploy
-```shell
-$ gcloud functions deploy dequeue --runtime python37 --trigger-topic compute-events
 ```
 
 ### raspit-compute-image
