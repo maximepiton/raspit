@@ -6,8 +6,8 @@ gensac: # site name
   max_windspeed: 35 # (km/h)
   min_flight_duration: 2 # (h)
   min_takeoff_windspeed: 5 # (km/h)
-  min_takeoff_windspeed_height: 50 # (m)
-  takeoff_winddir_reference: 150 # (°)
+  takeoff_winddir_reference: 150 # (°) ∈ [-180 ; 180], 0 being the east
   takeoff_winddir_tolerance: 45 # (°)
-  max_wind_gradient: 10 # (km/h/100m)
-  min_envelope_surface: 50 # (m.h)
+  takeoff_wind_height: 50 # (m)
+  max_wind_gradient: 15 # (km/h/100m)
+  goal_envelope_surface: 50 # (m.h)
